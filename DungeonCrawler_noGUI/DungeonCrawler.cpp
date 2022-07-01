@@ -8,7 +8,7 @@ DungeonCrawler::DungeonCrawler()
 
 void DungeonCrawler::play() {
     Character* character1 = new Character;
-    currentLevel->placeCharacter(character1, 1, 1);
+    currentLevel->placeCharacter(character1, 4, 3);
     while(true)
     {
         abstractUI->draw(currentLevel);

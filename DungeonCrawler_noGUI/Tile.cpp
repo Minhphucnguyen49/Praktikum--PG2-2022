@@ -16,7 +16,7 @@ std::string Tile::getCharacterTexture() {
 bool Tile::hasCharacter()
 {   //if Character locates on Tile --> true
     // Character on Tile <=> attribue, pointer character of Tile != nullptr
-    if (this->character != nullptr) {
+    if (this->pCharacter != nullptr) {
         return true;
     }
     return false;
@@ -32,7 +32,7 @@ int Tile::getCol() const {
 
 bool Tile::moveTo(Tile *destTile, Character *who)
 {
-    /**After both above-mentioned conditions are satisfied,
+    /**After both above-mentioned conditions (leftable and enterable) are satisfied,
     *  We can set the attribute Character* of starting Tile and target Tile
     *  by doing:
     *  1. Character* attribute of destination Tile = who;
@@ -42,14 +42,20 @@ bool Tile::moveTo(Tile *destTile, Character *who)
     */
 
     Tile* actualleft = this->onLeave(this,who);
-    if(actualleft==nullptr) return false;
+    if (actualleft == nullptr) {
+        std::cout << "can not leave this Tile" << std::endl;
+        return false;
+    }
 
-    Tile* EnteredTile = destTile->onEnter(actualleft,who);
-    if(EnteredTile == nullptr) return false;
-
+    Tile* enteredTile = destTile->onEnter(actualleft,who);
+    if (enteredTile == nullptr) {
+        std::cout << "can not enter this Tile!" << std::endl;
+        return false;
+    }
     actualleft->setCharacter(nullptr);
-    EnteredTile->setCharacter(who);//großer Unterschied: destTile->setCharacter();
-    who->setTile(EnteredTile);//update Tile* in Character
+    enteredTile->setCharacter(who);//großer Unterschied: destTile->setCharacter();
+    who->setTile(enteredTile);//update Tile* in Character
+
     return true;
 /************************************************************
     if (onLeave(destTile, who) != nullptr) {
@@ -81,6 +87,13 @@ bool Tile::moveTo(Tile *destTile, Character *who)
     return false;
 ******************************************************************/
 }
+
+/*
+ * Golden rule:
+ * enterable or leftable: return this;
+ * unable to enter or leave: return nullptr;
+ */
+
 
 /**
  * Floor onLeave & onEnter implementation
@@ -131,4 +144,102 @@ Tile* Portal::onLeave(Tile *destTile, Character *who)
     return this;
 }
 
+/**
+ * @brief Switch
+ */
 
+void Switch::switchDoor()
+{
+    if (!doorSwitch) {
+        texture = "!";
+        doorSwitch = true;
+    } else {
+        texture = "?";
+        doorSwitch = false;
+    }
+
+    // activate the Event --> This method call notify in Passive,
+    //and therefore call the overriden version in Door class
+    activate();
+
+}
+
+Tile* Switch::onLeave(Tile *destTile, Character *who)
+{
+    switchDoor();
+    return this;
+}
+
+Tile* Switch::onEnter(Tile* fromTile, Character* who)
+{
+    return this;
+}
+
+/**
+ * @brief Door
+ * @return
+ */
+bool Door::doorState()
+{
+    return state;
+}
+void Door::notify(Active *source)
+{
+    // if true: make Wall --> Floor
+    if (state == false) {
+        texture = "_";
+        state = true;
+    }
+    else {
+        texture = "|";
+        state = false;
+    }
+
+}
+Tile* Door::onLeave(Tile *destTile, Character *who)
+{
+    return this;
+}
+
+Tile* Door::onEnter(Tile* fromTile, Character* who)
+{
+    if (doorState()) //door open
+    {
+        return this;// behaves like a Floor Tile
+    }
+    return nullptr;// door close --> behaves like a Wall Tile
+}
+
+/**
+ * @brief Pit
+ */
+Tile* Pit::onLeave(Tile* destTile, Character *who)
+{
+    if ( typeid(*destTile).name() == typeid(Pit).name() )
+    {
+        return this;
+    }
+    if ( typeid(*destTile).name() == typeid(Ramp).name() )
+    {
+        return this;
+    }
+    return nullptr;
+}
+
+Tile* Pit::onEnter(Tile* destTile, Character *who)
+{
+    return this;
+}
+/**
+ * @brief Ramp
+ */
+Tile* Ramp::onLeave(Tile *destTile, Character *who)
+{
+    return this;
+
+}
+
+Tile* Ramp::onEnter(Tile *destTile, Character *who)
+{
+    return this;
+}
