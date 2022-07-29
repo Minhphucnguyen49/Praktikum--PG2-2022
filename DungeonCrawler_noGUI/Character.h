@@ -5,6 +5,7 @@
 #include <string>
 #include <Tile.h>
 #include <Level.h>
+#include <Controller.h>
 
 class Tile;
 
@@ -39,6 +40,7 @@ public:
     std::string characterTexture;
     Level* level;
     Tile* currentTile;
+    Controller* pController;
 
 };
 

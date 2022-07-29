@@ -6,7 +6,6 @@
 #include <vector>
 #include <Character.h>
 #include <Tile.h>
-
 class Tile;
 class Character;
 
@@ -81,6 +80,10 @@ public:
      * that matrix : 2 dimentional Array from Tiles (aus Kacheln)
      */
     std::array<std::array<Tile*, numRows>, numColumns> stage;
+    void makeFloor();
+    void makeWall();
+    void makePortal();
+    void makeSwitchDoor();
 };
 
 #endif // LEVEL_H
